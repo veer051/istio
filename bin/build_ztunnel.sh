@@ -18,6 +18,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+AUTH_HEADER=${AUTH_HEADER:-Authorization: Bearer $(gcloud auth print-access-token)}
+
 if [[ "${TARGET_OUT_LINUX:-}" == "" ]]; then
   echo "Environment variables not set. Make sure you run through the makefile (\`make init\`) rather than directly."
   exit 1
