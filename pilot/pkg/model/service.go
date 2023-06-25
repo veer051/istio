@@ -37,6 +37,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"istio.io/api/label"
+	"istio.io/istio/pilot/pkg/features"
 	"istio.io/istio/pilot/pkg/serviceregistry/provider"
 	"istio.io/istio/pkg/cluster"
 	"istio.io/istio/pkg/config/constants"
@@ -1048,7 +1049,7 @@ func (s *Service) GetAddressForProxy(node *Proxy) string {
 // GetExtraAddressesForProxy returns a k8s service's extra addresses to the cluster where the node resides.
 // Especially for dual stack k8s service to get other IP family addresses.
 func (s *Service) GetExtraAddressesForProxy(node *Proxy) []string {
-	if node.Metadata != nil {
+	if features.EnableDualStack && node.Metadata != nil {
 		if node.Metadata.ClusterID != "" {
 			addresses := s.ClusterVIPs.GetAddressesFor(node.Metadata.ClusterID)
 			if len(addresses) > 1 {
