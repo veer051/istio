@@ -23,6 +23,7 @@ CONTAINER_OPTIONS = --mount type=bind,source=/tmp,destination=/tmp --net=host
 
 export COMMONFILES_POSTPROCESS = tools/commonfiles-postprocess.sh
 
+#AspenMesh customization
 TOOLS_REGISTRY_PROVIDER ?= gcr.io
 PROJECT_ID ?= f5-gcs-7056-ptg-aspenmesh-pub/tw-istio-testing
 TOOLS_REGISTRY_REPO ?= build-tools
