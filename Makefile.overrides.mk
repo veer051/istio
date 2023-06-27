@@ -23,6 +23,12 @@ CONTAINER_OPTIONS = --mount type=bind,source=/tmp,destination=/tmp --net=host
 
 export COMMONFILES_POSTPROCESS = tools/commonfiles-postprocess.sh
 
+#AspenMesh customization
+TOOLS_REGISTRY_PROVIDER ?= gcr.io
+PROJECT_ID ?= f5-gcs-7056-ptg-aspenmesh-pub/tw-istio-testing
+TOOLS_REGISTRY_REPO ?= build-tools
+BUILD_TOOLS_ORG ?= F5-External
+
 ifeq ($(BUILD_WITH_CONTAINER),1)
 # create phony targets for the top-level items in the repo
 PHONYS := $(shell ls | grep -v Makefile)

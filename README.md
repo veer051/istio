@@ -115,3 +115,14 @@ milestone cannot be considered achieved if the issue isn't resolved.
     <img src="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/color/cncf-color.svg" width="300" alt="Cloud Native Computing Foundation logo"/>
     <p>Istio is a <a href="https://cncf.io">Cloud Native Computing Foundation</a> project.</p>
 </div>
+
+## Environment Variables for Building Locally
+
+Since we now build our own build-tools, the following environment variables need to be exported to pull the correct image.
+
+```script
+export TOOLS_REGISTRY_PROVIDER=gcr.io
+export PROJECT_ID=f5-gcs-7056-ptg-aspenmesh-pub/tw-istio-testing
+export TOOLS_REGISTRY_REPO=build-tools
+export BUILD_TOOLS_ORG=F5-External
+```
