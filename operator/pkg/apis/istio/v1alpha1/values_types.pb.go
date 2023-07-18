@@ -1603,7 +1603,7 @@ type GlobalConfig struct {
 	// The default value is "" and when caName="", the CA will be configured by other
 	// mechanisms (e.g., environmental variable CA_PROVIDER).
 	CaName           string                `protobuf:"bytes,65,opt,name=caName,proto3" json:"caName,omitempty"`
-	Autoscalingv2API *wrapperspb.BoolValue `protobuf:"bytes,66,opt,name=autoscalingv2API,proto3" json:"autoscalingv2API,omitempty"` // The next available key is 68
+	Autoscalingv2API *wrapperspb.BoolValue `protobuf:"bytes,66,opt,name=autoscalingv2API,proto3" json:"autoscalingv2API,omitempty"` // The next available key is 69
 }
 
 func (x *GlobalConfig) Reset() {
