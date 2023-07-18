@@ -2739,7 +2739,10 @@ type PilotConfig struct {
 	// The Container seccompProfile
 	//
 	// See: https://kubernetes.io/docs/tutorials/security/seccomp/
-	SeccompProfile *structpb.Struct `protobuf:"bytes,38,opt,name=seccompProfile,proto3" json:"seccompProfile,omitempty"`
+	SeccompProfile     *structpb.Struct   `protobuf:"bytes,38,opt,name=seccompProfile,proto3" json:"seccompProfile,omitempty"`
+	ExtraContainerArgs []*structpb.Struct `protobuf:"bytes,42,rep,name=extraContainerArgs,proto3" json:"extraContainerArgs,omitempty"`
+	VolumeMounts       []*structpb.Struct `protobuf:"bytes,49,rep,name=volumeMounts,proto3" json:"volumeMounts,omitempty"`
+	Volumes            []*structpb.Struct `protobuf:"bytes,51,rep,name=volumes,proto3" json:"volumes,omitempty"`
 }
 
 func (x *PilotConfig) Reset() {
@@ -2995,6 +2998,27 @@ func (x *PilotConfig) GetVariant() string {
 func (x *PilotConfig) GetSeccompProfile() *structpb.Struct {
 	if x != nil {
 		return x.SeccompProfile
+	}
+	return nil
+}
+
+func (x *PilotConfig) GetExtraContainerArgs() []*structpb.Struct {
+	if x != nil {
+		return x.ExtraContainerArgs
+	}
+	return nil
+}
+
+func (x *PilotConfig) GetVolumeMounts() []*structpb.Struct {
+	if x != nil {
+		return x.VolumeMounts
+	}
+	return nil
+}
+
+func (x *PilotConfig) GetVolumes() []*structpb.Struct {
+	if x != nil {
+		return x.Volumes
 	}
 	return nil
 }
@@ -6310,6 +6334,7 @@ var file_pkg_apis_istio_v1alpha1_values_types_proto_rawDesc = []byte{
 	0x61, 0x74, 0x6f, 0x72, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x73, 0x2f, 0x69, 0x73,
 	0x74, 0x69, 0x6f, 0x2f, 0x76, 0x31, 0x61, 0x6c, 0x70, 0x68, 0x61, 0x31, 0x62, 0x06, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x33,
+
 }
 
 var (
@@ -6512,76 +6537,79 @@ var file_pkg_apis_istio_v1alpha1_values_types_proto_depIdxs = []int32{
 	33,  // 117: v1alpha1.PilotConfig.configSource:type_name -> v1alpha1.PilotConfigSource
 	58,  // 118: v1alpha1.PilotConfig.tag:type_name -> google.protobuf.Value
 	59,  // 119: v1alpha1.PilotConfig.seccompProfile:type_name -> google.protobuf.Struct
-	0,   // 120: v1alpha1.PilotIngressConfig.ingressControllerMode:type_name -> v1alpha1.ingressControllerMode
-	57,  // 121: v1alpha1.PilotPolicyConfig.enabled:type_name -> google.protobuf.BoolValue
-	57,  // 122: v1alpha1.TelemetryConfig.enabled:type_name -> google.protobuf.BoolValue
-	28,  // 123: v1alpha1.TelemetryConfig.v2:type_name -> v1alpha1.TelemetryV2Config
-	57,  // 124: v1alpha1.TelemetryV2Config.enabled:type_name -> google.protobuf.BoolValue
-	29,  // 125: v1alpha1.TelemetryV2Config.metadata_exchange:type_name -> v1alpha1.TelemetryV2MetadataExchangeConfig
-	30,  // 126: v1alpha1.TelemetryV2Config.prometheus:type_name -> v1alpha1.TelemetryV2PrometheusConfig
-	31,  // 127: v1alpha1.TelemetryV2Config.stackdriver:type_name -> v1alpha1.TelemetryV2StackDriverConfig
-	32,  // 128: v1alpha1.TelemetryV2Config.access_log_policy:type_name -> v1alpha1.TelemetryV2AccessLogPolicyFilterConfig
-	57,  // 129: v1alpha1.TelemetryV2MetadataExchangeConfig.wasmEnabled:type_name -> google.protobuf.BoolValue
-	57,  // 130: v1alpha1.TelemetryV2PrometheusConfig.enabled:type_name -> google.protobuf.BoolValue
-	57,  // 131: v1alpha1.TelemetryV2PrometheusConfig.wasmEnabled:type_name -> google.protobuf.BoolValue
-	56,  // 132: v1alpha1.TelemetryV2PrometheusConfig.config_override:type_name -> v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride
-	57,  // 133: v1alpha1.TelemetryV2StackDriverConfig.enabled:type_name -> google.protobuf.BoolValue
-	57,  // 134: v1alpha1.TelemetryV2StackDriverConfig.logging:type_name -> google.protobuf.BoolValue
-	57,  // 135: v1alpha1.TelemetryV2StackDriverConfig.monitoring:type_name -> google.protobuf.BoolValue
-	57,  // 136: v1alpha1.TelemetryV2StackDriverConfig.topology:type_name -> google.protobuf.BoolValue
-	57,  // 137: v1alpha1.TelemetryV2StackDriverConfig.disableOutbound:type_name -> google.protobuf.BoolValue
-	59,  // 138: v1alpha1.TelemetryV2StackDriverConfig.configOverride:type_name -> google.protobuf.Struct
-	3,   // 139: v1alpha1.TelemetryV2StackDriverConfig.outboundAccessLogging:type_name -> v1alpha1.TelemetryV2StackDriverConfig.AccessLogging
-	3,   // 140: v1alpha1.TelemetryV2StackDriverConfig.inboundAccessLogging:type_name -> v1alpha1.TelemetryV2StackDriverConfig.AccessLogging
-	57,  // 141: v1alpha1.TelemetryV2AccessLogPolicyFilterConfig.enabled:type_name -> google.protobuf.BoolValue
-	60,  // 142: v1alpha1.TelemetryV2AccessLogPolicyFilterConfig.logWindowDuration:type_name -> google.protobuf.Duration
-	57,  // 143: v1alpha1.ProxyConfig.enableCoreDump:type_name -> google.protobuf.BoolValue
-	57,  // 144: v1alpha1.ProxyConfig.privileged:type_name -> google.protobuf.BoolValue
-	10,  // 145: v1alpha1.ProxyConfig.resources:type_name -> v1alpha1.Resources
-	1,   // 146: v1alpha1.ProxyConfig.tracer:type_name -> v1alpha1.tracer
-	59,  // 147: v1alpha1.ProxyConfig.lifecycle:type_name -> google.protobuf.Struct
-	57,  // 148: v1alpha1.ProxyConfig.holdApplicationUntilProxyStarts:type_name -> google.protobuf.BoolValue
-	10,  // 149: v1alpha1.ProxyInitConfig.resources:type_name -> v1alpha1.Resources
-	59,  // 150: v1alpha1.SDSConfig.token:type_name -> google.protobuf.Struct
-	59,  // 151: v1alpha1.ServiceConfig.annotations:type_name -> google.protobuf.Struct
-	57,  // 152: v1alpha1.SidecarInjectorConfig.enableNamespacesByDefault:type_name -> google.protobuf.BoolValue
-	59,  // 153: v1alpha1.SidecarInjectorConfig.neverInjectSelector:type_name -> google.protobuf.Struct
-	59,  // 154: v1alpha1.SidecarInjectorConfig.alwaysInjectSelector:type_name -> google.protobuf.Struct
-	57,  // 155: v1alpha1.SidecarInjectorConfig.rewriteAppHTTPProbe:type_name -> google.protobuf.BoolValue
-	59,  // 156: v1alpha1.SidecarInjectorConfig.injectedAnnotations:type_name -> google.protobuf.Struct
-	59,  // 157: v1alpha1.SidecarInjectorConfig.objectSelector:type_name -> google.protobuf.Struct
-	59,  // 158: v1alpha1.SidecarInjectorConfig.templates:type_name -> google.protobuf.Struct
-	57,  // 159: v1alpha1.SidecarInjectorConfig.useLegacySelectors:type_name -> google.protobuf.BoolValue
-	43,  // 160: v1alpha1.TracerConfig.datadog:type_name -> v1alpha1.TracerDatadogConfig
-	44,  // 161: v1alpha1.TracerConfig.lightstep:type_name -> v1alpha1.TracerLightStepConfig
-	45,  // 162: v1alpha1.TracerConfig.zipkin:type_name -> v1alpha1.TracerZipkinConfig
-	46,  // 163: v1alpha1.TracerConfig.stackdriver:type_name -> v1alpha1.TracerStackdriverConfig
-	57,  // 164: v1alpha1.TracerStackdriverConfig.debug:type_name -> google.protobuf.BoolValue
-	57,  // 165: v1alpha1.BaseConfig.enableCRDTemplates:type_name -> google.protobuf.BoolValue
-	57,  // 166: v1alpha1.BaseConfig.enableIstioConfigCRDs:type_name -> google.protobuf.BoolValue
-	57,  // 167: v1alpha1.BaseConfig.validateGateway:type_name -> google.protobuf.BoolValue
-	5,   // 168: v1alpha1.Values.cni:type_name -> v1alpha1.CNIConfig
-	15,  // 169: v1alpha1.Values.gateways:type_name -> v1alpha1.GatewaysConfig
-	16,  // 170: v1alpha1.Values.global:type_name -> v1alpha1.GlobalConfig
-	24,  // 171: v1alpha1.Values.pilot:type_name -> v1alpha1.PilotConfig
-	58,  // 172: v1alpha1.Values.ztunnel:type_name -> google.protobuf.Value
-	27,  // 173: v1alpha1.Values.telemetry:type_name -> v1alpha1.TelemetryConfig
-	41,  // 174: v1alpha1.Values.sidecarInjectorWebhook:type_name -> v1alpha1.SidecarInjectorConfig
-	5,   // 175: v1alpha1.Values.istio_cni:type_name -> v1alpha1.CNIConfig
-	58,  // 176: v1alpha1.Values.meshConfig:type_name -> google.protobuf.Value
-	47,  // 177: v1alpha1.Values.base:type_name -> v1alpha1.BaseConfig
-	48,  // 178: v1alpha1.Values.istiodRemote:type_name -> v1alpha1.IstiodRemoteConfig
-	57,  // 179: v1alpha1.ZeroVPNConfig.enabled:type_name -> google.protobuf.BoolValue
-	61,  // 180: v1alpha1.IntOrString.intVal:type_name -> google.protobuf.Int32Value
-	62,  // 181: v1alpha1.IntOrString.strVal:type_name -> google.protobuf.StringValue
-	59,  // 182: v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride.gateway:type_name -> google.protobuf.Struct
-	59,  // 183: v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride.inboundSidecar:type_name -> google.protobuf.Struct
-	59,  // 184: v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride.outboundSidecar:type_name -> google.protobuf.Struct
-	185, // [185:185] is the sub-list for method output_type
-	185, // [185:185] is the sub-list for method input_type
-	185, // [185:185] is the sub-list for extension type_name
-	185, // [185:185] is the sub-list for extension extendee
-	0,   // [0:185] is the sub-list for field type_name
+	59,  // 120: v1alpha1.PilotConfig.extraContainerArgs:type_name -> google.protobuf.Struct
+	59,  // 121: v1alpha1.PilotConfig.volumeMounts:type_name -> google.protobuf.Struct
+	59,  // 122: v1alpha1.PilotConfig.volumes:type_name -> google.protobuf.Struct
+	0,   // 123: v1alpha1.PilotIngressConfig.ingressControllerMode:type_name -> v1alpha1.ingressControllerMode
+	57,  // 124: v1alpha1.PilotPolicyConfig.enabled:type_name -> google.protobuf.BoolValue
+	57,  // 125: v1alpha1.TelemetryConfig.enabled:type_name -> google.protobuf.BoolValue
+	28,  // 126: v1alpha1.TelemetryConfig.v2:type_name -> v1alpha1.TelemetryV2Config
+	57,  // 127: v1alpha1.TelemetryV2Config.enabled:type_name -> google.protobuf.BoolValue
+	29,  // 128: v1alpha1.TelemetryV2Config.metadata_exchange:type_name -> v1alpha1.TelemetryV2MetadataExchangeConfig
+	30,  // 129: v1alpha1.TelemetryV2Config.prometheus:type_name -> v1alpha1.TelemetryV2PrometheusConfig
+	31,  // 130: v1alpha1.TelemetryV2Config.stackdriver:type_name -> v1alpha1.TelemetryV2StackDriverConfig
+	32,  // 131: v1alpha1.TelemetryV2Config.access_log_policy:type_name -> v1alpha1.TelemetryV2AccessLogPolicyFilterConfig
+	57,  // 132: v1alpha1.TelemetryV2MetadataExchangeConfig.wasmEnabled:type_name -> google.protobuf.BoolValue
+	57,  // 133: v1alpha1.TelemetryV2PrometheusConfig.enabled:type_name -> google.protobuf.BoolValue
+	57,  // 134: v1alpha1.TelemetryV2PrometheusConfig.wasmEnabled:type_name -> google.protobuf.BoolValue
+	56,  // 135: v1alpha1.TelemetryV2PrometheusConfig.config_override:type_name -> v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride
+	57,  // 136: v1alpha1.TelemetryV2StackDriverConfig.enabled:type_name -> google.protobuf.BoolValue
+	57,  // 137: v1alpha1.TelemetryV2StackDriverConfig.logging:type_name -> google.protobuf.BoolValue
+	57,  // 138: v1alpha1.TelemetryV2StackDriverConfig.monitoring:type_name -> google.protobuf.BoolValue
+	57,  // 139: v1alpha1.TelemetryV2StackDriverConfig.topology:type_name -> google.protobuf.BoolValue
+	57,  // 140: v1alpha1.TelemetryV2StackDriverConfig.disableOutbound:type_name -> google.protobuf.BoolValue
+	59,  // 141: v1alpha1.TelemetryV2StackDriverConfig.configOverride:type_name -> google.protobuf.Struct
+	3,   // 142: v1alpha1.TelemetryV2StackDriverConfig.outboundAccessLogging:type_name -> v1alpha1.TelemetryV2StackDriverConfig.AccessLogging
+	3,   // 143: v1alpha1.TelemetryV2StackDriverConfig.inboundAccessLogging:type_name -> v1alpha1.TelemetryV2StackDriverConfig.AccessLogging
+	57,  // 144: v1alpha1.TelemetryV2AccessLogPolicyFilterConfig.enabled:type_name -> google.protobuf.BoolValue
+	60,  // 145: v1alpha1.TelemetryV2AccessLogPolicyFilterConfig.logWindowDuration:type_name -> google.protobuf.Duration
+	57,  // 146: v1alpha1.ProxyConfig.enableCoreDump:type_name -> google.protobuf.BoolValue
+	57,  // 147: v1alpha1.ProxyConfig.privileged:type_name -> google.protobuf.BoolValue
+	10,  // 148: v1alpha1.ProxyConfig.resources:type_name -> v1alpha1.Resources
+	1,   // 149: v1alpha1.ProxyConfig.tracer:type_name -> v1alpha1.tracer
+	59,  // 150: v1alpha1.ProxyConfig.lifecycle:type_name -> google.protobuf.Struct
+	57,  // 151: v1alpha1.ProxyConfig.holdApplicationUntilProxyStarts:type_name -> google.protobuf.BoolValue
+	10,  // 152: v1alpha1.ProxyInitConfig.resources:type_name -> v1alpha1.Resources
+	59,  // 153: v1alpha1.SDSConfig.token:type_name -> google.protobuf.Struct
+	59,  // 154: v1alpha1.ServiceConfig.annotations:type_name -> google.protobuf.Struct
+	57,  // 155: v1alpha1.SidecarInjectorConfig.enableNamespacesByDefault:type_name -> google.protobuf.BoolValue
+	59,  // 156: v1alpha1.SidecarInjectorConfig.neverInjectSelector:type_name -> google.protobuf.Struct
+	59,  // 157: v1alpha1.SidecarInjectorConfig.alwaysInjectSelector:type_name -> google.protobuf.Struct
+	57,  // 158: v1alpha1.SidecarInjectorConfig.rewriteAppHTTPProbe:type_name -> google.protobuf.BoolValue
+	59,  // 159: v1alpha1.SidecarInjectorConfig.injectedAnnotations:type_name -> google.protobuf.Struct
+	59,  // 160: v1alpha1.SidecarInjectorConfig.objectSelector:type_name -> google.protobuf.Struct
+	59,  // 161: v1alpha1.SidecarInjectorConfig.templates:type_name -> google.protobuf.Struct
+	57,  // 162: v1alpha1.SidecarInjectorConfig.useLegacySelectors:type_name -> google.protobuf.BoolValue
+	43,  // 163: v1alpha1.TracerConfig.datadog:type_name -> v1alpha1.TracerDatadogConfig
+	44,  // 164: v1alpha1.TracerConfig.lightstep:type_name -> v1alpha1.TracerLightStepConfig
+	45,  // 165: v1alpha1.TracerConfig.zipkin:type_name -> v1alpha1.TracerZipkinConfig
+	46,  // 166: v1alpha1.TracerConfig.stackdriver:type_name -> v1alpha1.TracerStackdriverConfig
+	57,  // 167: v1alpha1.TracerStackdriverConfig.debug:type_name -> google.protobuf.BoolValue
+	57,  // 168: v1alpha1.BaseConfig.enableCRDTemplates:type_name -> google.protobuf.BoolValue
+	57,  // 169: v1alpha1.BaseConfig.enableIstioConfigCRDs:type_name -> google.protobuf.BoolValue
+	57,  // 170: v1alpha1.BaseConfig.validateGateway:type_name -> google.protobuf.BoolValue
+	5,   // 171: v1alpha1.Values.cni:type_name -> v1alpha1.CNIConfig
+	15,  // 172: v1alpha1.Values.gateways:type_name -> v1alpha1.GatewaysConfig
+	16,  // 173: v1alpha1.Values.global:type_name -> v1alpha1.GlobalConfig
+	24,  // 174: v1alpha1.Values.pilot:type_name -> v1alpha1.PilotConfig
+	58,  // 175: v1alpha1.Values.ztunnel:type_name -> google.protobuf.Value
+	27,  // 176: v1alpha1.Values.telemetry:type_name -> v1alpha1.TelemetryConfig
+	41,  // 177: v1alpha1.Values.sidecarInjectorWebhook:type_name -> v1alpha1.SidecarInjectorConfig
+	5,   // 178: v1alpha1.Values.istio_cni:type_name -> v1alpha1.CNIConfig
+	58,  // 179: v1alpha1.Values.meshConfig:type_name -> google.protobuf.Value
+	47,  // 180: v1alpha1.Values.base:type_name -> v1alpha1.BaseConfig
+	48,  // 181: v1alpha1.Values.istiodRemote:type_name -> v1alpha1.IstiodRemoteConfig
+	57,  // 182: v1alpha1.ZeroVPNConfig.enabled:type_name -> google.protobuf.BoolValue
+	61,  // 183: v1alpha1.IntOrString.intVal:type_name -> google.protobuf.Int32Value
+	62,  // 184: v1alpha1.IntOrString.strVal:type_name -> google.protobuf.StringValue
+	59,  // 185: v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride.gateway:type_name -> google.protobuf.Struct
+	59,  // 186: v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride.inboundSidecar:type_name -> google.protobuf.Struct
+	59,  // 187: v1alpha1.TelemetryV2PrometheusConfig.ConfigOverride.outboundSidecar:type_name -> google.protobuf.Struct
+	188, // [188:188] is the sub-list for method output_type
+	188, // [188:188] is the sub-list for method input_type
+	188, // [188:188] is the sub-list for extension type_name
+	188, // [188:188] is the sub-list for extension extendee
+	0,   // [0:188] is the sub-list for field type_name
 }
 
 func init() { file_pkg_apis_istio_v1alpha1_values_types_proto_init() }
