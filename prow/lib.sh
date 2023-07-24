@@ -53,8 +53,9 @@ function trace() {
 }
 
 function setup_gcloud_credentials() {
+  GCP_REGISTRIES=${GCP_REGISTRIES:-"gcr.io,us-docker.pkg.dev"}
   if [[ $(command -v gcloud) ]]; then
-    gcloud auth configure-docker us-docker.pkg.dev -q
+    gcloud auth configure-docker "${GCP_REGISTRIES}" -q
   elif [[ $(command -v docker-credential-gcr) ]]; then
     docker-credential-gcr configure-docker --registries=-us-docker.pkg.dev
   else
