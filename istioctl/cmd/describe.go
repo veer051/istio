@@ -1255,7 +1255,7 @@ func describePeerAuthentication(writer io.Writer, kubeClient kube.CLIClient, con
 	}
 
 	matchedPA := findMatchedConfigs(podsLabels, cfgs)
-	effectivePA := authnv1beta1.ComposePeerAuthentication(meshCfg.RootNamespace, matchedPA)
+	effectivePA, _ := authnv1beta1.ComposePeerAuthentication(meshCfg.RootNamespace, matchedPA)
 	printPeerAuthentication(writer, effectivePA)
 	if len(matchedPA) != 0 {
 		printConfigs(writer, matchedPA)

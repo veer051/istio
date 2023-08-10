@@ -1781,9 +1781,10 @@ func TestInboundMTLSSettings(t *testing.T) {
 func TestComposePeerAuthentication(t *testing.T) {
 	now := time.Now()
 	tests := []struct {
-		name    string
-		configs []*config.Config
-		want    *v1beta1.PeerAuthentication
+		name      string
+		configs   []*config.Config
+		want      *v1beta1.PeerAuthentication
+		httpAlpns bool
 	}{
 		{
 			name:    "no config",
@@ -1801,6 +1802,30 @@ func TestComposePeerAuthentication(t *testing.T) {
 					Meta: config.Meta{
 						Name:      "default",
 						Namespace: "root-namespace",
+					},
+					Spec: &v1beta1.PeerAuthentication{
+						Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+							Mode: v1beta1.PeerAuthentication_MutualTLS_STRICT,
+						},
+					},
+				},
+			},
+			want: &v1beta1.PeerAuthentication{
+				Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+					Mode: v1beta1.PeerAuthentication_MutualTLS_STRICT,
+				},
+			},
+		},
+		{
+			name: "mesh only with http-alpns.aspenmesh.io",
+			configs: []*config.Config{
+				{
+					Meta: config.Meta{
+						Name:      "default",
+						Namespace: "root-namespace",
+						Annotations: map[string]string{
+							"http-alpns.aspenmesh.io": "true",
+						},
 					},
 					Spec: &v1beta1.PeerAuthentication{
 						Mtls: &v1beta1.PeerAuthentication_MutualTLS{
@@ -1896,6 +1921,116 @@ func TestComposePeerAuthentication(t *testing.T) {
 							MatchLabels: map[string]string{
 								"app": "foo",
 							},
+						},
+					},
+				},
+			},
+			want: &v1beta1.PeerAuthentication{
+				Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+					Mode: v1beta1.PeerAuthentication_MutualTLS_PERMISSIVE,
+				},
+			},
+		},
+		{
+			name: "workload config for http-alpns.aspenmesh.io annotation set",
+			configs: []*config.Config{
+				{
+					Meta: config.Meta{
+						Name:      "foo",
+						Namespace: "my-ns",
+						Annotations: map[string]string{
+							"http-alpns.aspenmesh.io": "true",
+						},
+					},
+					Spec: &v1beta1.PeerAuthentication{
+						Selector: &type_beta.WorkloadSelector{
+							MatchLabels: map[string]string{
+								"app": "foo",
+							},
+						},
+					},
+				},
+			},
+			want: &v1beta1.PeerAuthentication{
+				Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+					Mode: v1beta1.PeerAuthentication_MutualTLS_PERMISSIVE,
+				},
+			},
+			httpAlpns: true,
+		},
+		{
+			name: "workload config for http-alpns.aspenmesh.io annotation set",
+			configs: []*config.Config{
+				{
+					Meta: config.Meta{
+						Name:      "foo",
+						Namespace: "my-ns",
+						Annotations: map[string]string{
+							"http-alpns.aspenmesh.io": "true",
+						},
+					},
+					Spec: &v1beta1.PeerAuthentication{
+						Selector: &type_beta.WorkloadSelector{
+							MatchLabels: map[string]string{
+								"app": "foo",
+							},
+						},
+					},
+				},
+			},
+			want: &v1beta1.PeerAuthentication{
+				Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+					Mode: v1beta1.PeerAuthentication_MutualTLS_PERMISSIVE,
+				},
+			},
+			httpAlpns: true,
+		},
+		{
+			name: "namespace config for http-alpns.aspenmesh.io annotation set",
+			configs: []*config.Config{
+				{
+					Meta: config.Meta{
+						Name:      "default",
+						Namespace: "my-ns",
+						Annotations: map[string]string{
+							"http-alpns.aspenmesh.io": "true",
+						},
+					},
+					Spec: &v1beta1.PeerAuthentication{},
+				},
+			},
+			want: &v1beta1.PeerAuthentication{
+				Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+					Mode: v1beta1.PeerAuthentication_MutualTLS_PERMISSIVE,
+				},
+			},
+			httpAlpns: true,
+		},
+		{
+			name: "mesh vs namespace",
+			configs: []*config.Config{
+				{
+					Meta: config.Meta{
+						Name:      "default",
+						Namespace: "root-namespace",
+					},
+					Spec: &v1beta1.PeerAuthentication{
+						Selector: &type_beta.WorkloadSelector{
+							MatchLabels: map[string]string{},
+						},
+						Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+							Mode: v1beta1.PeerAuthentication_MutualTLS_STRICT,
+						},
+					},
+				},
+				{
+					Meta: config.Meta{
+						Name:      "default",
+						Namespace: "my-ns",
+					},
+					Spec: &v1beta1.PeerAuthentication{
+						Mtls: &v1beta1.PeerAuthentication_MutualTLS{
+							Mode: v1beta1.PeerAuthentication_MutualTLS_PERMISSIVE,
 						},
 					},
 				},
@@ -2282,7 +2417,8 @@ func TestComposePeerAuthentication(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ComposePeerAuthentication("root-namespace", tt.configs); !reflect.DeepEqual(got, tt.want) {
+			if got, httpAlpns := ComposePeerAuthentication("root-namespace", tt.configs); !reflect.DeepEqual(got, tt.want) &&
+				httpAlpns == tt.httpAlpns {
 				t.Errorf("composePeerAuthentication() = %v, want %v", got, tt.want)
 			}
 		})

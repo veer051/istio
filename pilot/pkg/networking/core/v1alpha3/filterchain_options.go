@@ -20,6 +20,7 @@ import (
 
 	"istio.io/istio/pilot/pkg/model"
 	"istio.io/istio/pilot/pkg/networking"
+	"istio.io/istio/pilot/pkg/networking/util"
 	"istio.io/istio/pilot/pkg/security/authn"
 	xdsfilters "istio.io/istio/pilot/pkg/xds/filters"
 )
@@ -86,6 +87,24 @@ var (
 		{
 			// HTTP over MTLS
 			ApplicationProtocols: allIstioMtlsALPNs,
+			TransportProtocol:    xdsfilters.TLSTransportProtocol,
+			Protocol:             networking.ListenerProtocolHTTP,
+			TLS:                  true,
+		},
+		{
+			// Plaintext HTTP
+			Protocol:          networking.ListenerProtocolHTTP,
+			TransportProtocol: xdsfilters.RawBufferTransportProtocol,
+		},
+		// We do not need to handle other simple TLS or others, as this is explicitly declared as HTTP type.
+	}
+	// aspen mesh alteration
+	// copy of inboundPermissiveHTTPFilterChainMatchWithMxcOptions to be used when the user
+	// has specified an annotation of httpalpns.aspenmesh.io to true
+	inboundPermissiveHTTPFilterChainMatchWithMxcOptionsHTTPALPNs = []FilterChainMatchOptions{
+		{
+			// HTTP over MTLS
+			ApplicationProtocols: append(allIstioMtlsALPNs, httpALPNs...),
 			TransportProtocol:    xdsfilters.TLSTransportProtocol,
 			Protocol:             networking.ListenerProtocolHTTP,
 			TLS:                  true,
@@ -186,13 +205,19 @@ func getTLSFilterChainMatchOptions(protocol networking.ListenerProtocol) []Filte
 }
 
 // getFilterChainMatchOptions returns the FilterChainMatchOptions that should be used based on mTLS mode and protocol
-func getFilterChainMatchOptions(settings authn.MTLSSettings, protocol networking.ListenerProtocol) []FilterChainMatchOptions {
+func getFilterChainMatchOptions(settings authn.MTLSSettings, protocol networking.ListenerProtocol, clusterName string) []FilterChainMatchOptions {
 	switch protocol {
 	case networking.ListenerProtocolHTTP:
 		switch settings.Mode {
 		case model.MTLSStrict:
 			return inboundStrictHTTPFilterChainMatchOptions
 		case model.MTLSPermissive:
+			if settings.HTTPALPNs {
+				if clusterName == util.InboundPassthroughClusterIpv4 || clusterName == util.InboundPassthroughClusterIpv6 {
+					return inboundPermissiveHTTPFilterChainMatchWithMxcOptions
+				}
+				return inboundPermissiveHTTPFilterChainMatchWithMxcOptionsHTTPALPNs
+			}
 			return inboundPermissiveHTTPFilterChainMatchWithMxcOptions
 		default:
 			return inboundPlainTextHTTPFilterChainMatchOptions
@@ -202,6 +227,12 @@ func getFilterChainMatchOptions(settings authn.MTLSSettings, protocol networking
 		case model.MTLSStrict:
 			return inboundStrictFilterChainMatchOptions
 		case model.MTLSPermissive:
+			if settings.HTTPALPNs {
+				if clusterName == util.InboundPassthroughClusterIpv4 || clusterName == util.InboundPassthroughClusterIpv6 {
+					return inboundPermissiveFilterChainMatchWithMxcOptions
+				}
+				return inboundPermissiveHTTPFilterChainMatchWithMxcOptionsHTTPALPNs
+			}
 			return inboundPermissiveFilterChainMatchWithMxcOptions
 		default:
 			return inboundPlainTextFilterChainMatchOptions

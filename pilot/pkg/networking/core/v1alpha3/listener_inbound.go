@@ -186,7 +186,7 @@ func (lb *ListenerBuilder) buildInboundHBONEListeners() []*listener.Listener {
 		lp := istionetworking.ModelProtocolToListenerProtocol(cc.port.Protocol, core.TrafficDirection_INBOUND)
 		// Internal chain has no mTLS
 		mtls := authn.MTLSSettings{Port: cc.port.TargetPort, Mode: model.MTLSDisable}
-		opts := getFilterChainMatchOptions(mtls, lp)
+		opts := getFilterChainMatchOptions(mtls, lp, cc.clusterName)
 		chains := lb.inboundChainForOpts(cc, mtls, opts)
 		for _, c := range chains {
 			fcm := c.GetFilterChainMatch()
@@ -229,7 +229,7 @@ func (lb *ListenerBuilder) buildInboundListeners() []*listener.Listener {
 			mtls.HTTP = mtls.TCP
 		} else {
 			lp := istionetworking.ModelProtocolToListenerProtocol(cc.port.Protocol, core.TrafficDirection_INBOUND)
-			opts = getFilterChainMatchOptions(mtls, lp)
+			opts = getFilterChainMatchOptions(mtls, lp, cc.clusterName)
 		}
 		// Build the actual chain
 		chains := lb.inboundChainForOpts(cc, mtls, opts)
@@ -745,7 +745,7 @@ func buildInboundPassthroughChains(lb *ListenerBuilder) []*listener.FilterChain 
 				passthrough: true,
 				hbone:       lb.node.IsWaypointProxy(),
 			}
-			opts := getFilterChainMatchOptions(mtls, istionetworking.ListenerProtocolAuto)
+			opts := getFilterChainMatchOptions(mtls, istionetworking.ListenerProtocolAuto, clusterName)
 			filterChains = append(filterChains, lb.inboundChainForOpts(cc, mtls, opts)...)
 		}
 	}

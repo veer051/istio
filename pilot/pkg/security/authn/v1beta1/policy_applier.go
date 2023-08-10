@@ -17,6 +17,7 @@ package v1beta1
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -47,12 +48,16 @@ import (
 
 var authnLog = log.RegisterScope("authn", "authn debugging", 0)
 
+const httpAlpnsAnnotation = "http-alpns.aspenmesh.io"
+
 // Implementation of authn.PolicyApplier with v1beta1 API.
 type v1beta1PolicyApplier struct {
 	// processedJwtRules is the consolidate JWT rules from all jwtPolicies.
 	processedJwtRules []*v1beta1.JWTRule
 
 	consolidatedPeerPolicy *v1beta1.PeerAuthentication
+
+	consolidatedAlpnPolicy bool
 
 	push *model.PushContext
 }
@@ -79,9 +84,12 @@ func NewPolicyApplier(rootNamespace string,
 			processedJwtRules[i].GetIssuer(), processedJwtRules[j].GetIssuer()) < 0
 	})
 
+	consolidatedPeerPolicy, useHTTPALPNs := ComposePeerAuthentication(rootNamespace, peerPolicies)
+
 	return &v1beta1PolicyApplier{
 		processedJwtRules:      processedJwtRules,
-		consolidatedPeerPolicy: ComposePeerAuthentication(rootNamespace, peerPolicies),
+		consolidatedPeerPolicy: consolidatedPeerPolicy,
+		consolidatedAlpnPolicy: useHTTPALPNs,
 		push:                   push,
 	}
 }
@@ -199,6 +207,7 @@ func (a *v1beta1PolicyApplier) InboundMTLSSettings(
 			trustDomainAliases, minTLSVersion),
 		HTTP: authn_utils.BuildInboundTLS(effectiveMTLSMode, node, networking.ListenerProtocolHTTP,
 			trustDomainAliases, minTLSVersion),
+		HTTPALPNs: a.consolidatedAlpnPolicy,
 	}
 }
 
@@ -415,7 +424,7 @@ func getMutualTLSMode(mtls *v1beta1.PeerAuthentication_MutualTLS) model.MutualTL
 // - UNSET will be replaced with the setting from the parent. I.e UNSET port-level config will be
 // replaced with config from workload-level, UNSET in workload-level config will be replaced with
 // one in namespace-level and so on.
-func ComposePeerAuthentication(rootNamespace string, configs []*config.Config) *v1beta1.PeerAuthentication {
+func ComposePeerAuthentication(rootNamespace string, configs []*config.Config) (*v1beta1.PeerAuthentication, bool) {
 	var meshCfg, namespaceCfg, workloadCfg *config.Config
 
 	// Initial outputPolicy is set to a PERMISSIVE.
@@ -455,16 +464,37 @@ func ComposePeerAuthentication(rootNamespace string, configs []*config.Config) *
 		// If mesh policy is defined, update parent policy to mesh policy.
 		outputPolicy.Mtls = meshCfg.Spec.(*v1beta1.PeerAuthentication).Mtls
 	}
-
+	httpAlpnsForPermissive := false
 	if namespaceCfg != nil && !isMtlsModeUnset(namespaceCfg.Spec.(*v1beta1.PeerAuthentication).Mtls) {
 		// If namespace policy is defined, update output policy to namespace policy. This means namespace
 		// policy overwrite mesh policy.
 		outputPolicy.Mtls = namespaceCfg.Spec.(*v1beta1.PeerAuthentication).Mtls
+
+		if v, ok := namespaceCfg.Annotations[httpAlpnsAnnotation]; ok {
+			boolVal, err := strconv.ParseBool(v)
+			if err != nil {
+				authnLog.Warnf("PeerAuthentication for namespace %v/%v has %v annotation set to %v",
+					namespaceCfg.Namespace, namespaceCfg.Name, httpAlpnsAnnotation, v)
+			} else {
+				httpAlpnsForPermissive = boolVal
+			}
+		}
 	}
 
 	var workloadPolicy *v1beta1.PeerAuthentication
 	if workloadCfg != nil {
 		workloadPolicy = workloadCfg.Spec.(*v1beta1.PeerAuthentication)
+
+		if v, ok := workloadCfg.Annotations[httpAlpnsAnnotation]; ok {
+			boolVal, err := strconv.ParseBool(v)
+			if err != nil {
+				authnLog.Warnf("PeerAuthentication for workload %v/%v has %v annotation set to %v",
+					workloadCfg.Namespace, workloadCfg.Name, httpAlpnsAnnotation, v)
+			} else {
+				httpAlpnsForPermissive = boolVal
+			}
+		}
+
 	}
 
 	if workloadPolicy != nil && !isMtlsModeUnset(workloadPolicy.Mtls) {
@@ -484,7 +514,7 @@ func ComposePeerAuthentication(rootNamespace string, configs []*config.Config) *
 		}
 	}
 
-	return &outputPolicy
+	return &outputPolicy, httpAlpnsForPermissive
 }
 
 func isMtlsModeUnset(mtls *v1beta1.PeerAuthentication_MutualTLS) bool {

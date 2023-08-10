@@ -61,4 +61,6 @@ type MTLSSettings struct {
 	TCP *tlsv3.DownstreamTlsContext
 	// HTTP describes the tls context to use for HTTP filter chains
 	HTTP *tlsv3.DownstreamTlsContext
+	// HTTPALPNs is set if the user specified an annotation to use standard HTTP alpns and not istio specific ALPNs
+	HTTPALPNs bool
 }
