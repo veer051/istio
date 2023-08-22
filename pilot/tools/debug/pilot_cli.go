@@ -290,6 +290,7 @@ func portForwardPilot(kubeConfig, pilotURL string) (*os.Process, string, error) 
 		return nil, "", fmt.Errorf("cannot find istio-pilot pod")
 	}
 
+	//nolint:gosec
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	localPort := r.Intn(LocalPortEnd-LocalPortStart) + LocalPortStart
 	cmd := fmt.Sprintf("kubectl port-forward %s -n istio-system %d:15010", podName, localPort)
