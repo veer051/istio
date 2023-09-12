@@ -608,7 +608,7 @@ func commonInstallArgs(ctx resource.Context, cfg Config, c cluster.Cluster, defa
 
 	if ctx.Settings().EnableDualStack {
 		args.AppendSet("values.pilot.env.ISTIO_DUAL_STACK", "true")
-		args.AppendSet("meshConfig.defaultConfig.proxyMetadata.ISTIO_DUAL_STACK", "true")
+		args.AppendSet("meshConfig.defaultConfig.proxyMetadata.ISTIO_AGENT_DUAL_STACK", "true")
 	}
 
 	// Include all user-specified values.
