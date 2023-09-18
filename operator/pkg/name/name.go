@@ -39,6 +39,7 @@ const (
 	MutatingWebhookConfigurationStr   = "MutatingWebhookConfiguration"
 	NamespaceStr                      = "Namespace"
 	PVCStr                            = "PersistentVolumeClaim"
+	NetworkAttachmentDefinitionStr    = "NetworkAttachmentDefinition"
 	PodStr                            = "Pod"
 	PDBStr                            = "PodDisruptionBudget"
 	ReplicationControllerStr          = "ReplicationController"
