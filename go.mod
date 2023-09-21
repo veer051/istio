@@ -88,8 +88,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.11.2
-	istio.io/api v0.0.0-20230713061407-06047cce866f
-	istio.io/client-go v1.18.1-0.20230713061908-17d95fabac25
+	istio.io/api v0.0.0-20230907070654-d9967b42fc7e
+	istio.io/client-go v1.18.2-0.20230907071155-b00dccd57229
 	istio.io/pkg v0.0.0-20230524020242-1015535057be
 	k8s.io/api v0.27.0
 	k8s.io/apiextensions-apiserver v0.27.0
@@ -142,7 +142,7 @@ require (
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
 	github.com/containerd/typeurl v1.0.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
+	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v23.0.3+incompatible // indirect
