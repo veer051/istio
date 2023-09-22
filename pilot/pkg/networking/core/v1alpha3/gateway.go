@@ -1066,3 +1066,28 @@ func buildGatewayVirtualHostDomains(node *model.Proxy, hostname string, port int
 	}
 	return domains
 }
+
+// Invalid cipher suites lead Envoy to NACKing. This filters the list down to just the supported set.
+func filteredGatewayCipherSuites(server *networking.Server) []string {
+	suites := server.Tls.CipherSuites
+
+	if features.CarrierGradeCipherSuite && len(suites) == 0 {
+		suites = security.ValidCarrierGradeCipherSuites.UnsortedList()
+	}
+
+	ret := make([]string, 0, len(suites))
+	validCiphers := sets.New[string]()
+	for _, s := range suites {
+		isValidCipherSuite := security.IsValidCipherSuite
+		if features.CarrierGradeCipherSuite {
+			isValidCipherSuite = security.IsValidCarrierGradeCipherSuite
+		}
+		if isValidCipherSuite(s) {
+			if !validCiphers.Contains(s) {
+				ret = append(ret, s)
+				validCiphers = validCiphers.Insert(s)
+			}
+		}
+	}
+	return ret
+}

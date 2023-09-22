@@ -197,6 +197,12 @@ meshConfig:
   enablePrometheusMerge: true
 
 global:
+  # //ASPENMESH
+  carrierGradeCipherSuites: false
+  # // manually configure the cipher suite list that istiod uses when sidecars
+  # // connect to it (there is no sidecar for istiod)
+  istiodCipherSuiteList: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+  # //ASPENMESH
   # Used to locate istiod.
   istioNamespace: istio-system
   # List of cert-signers to allow "approve" action in the istio cluster role

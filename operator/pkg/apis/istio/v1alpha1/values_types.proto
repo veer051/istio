@@ -465,6 +465,11 @@ message GlobalConfig {
   // treatment will be considered.
   string platform = 69;
   // The next available key is 70
+  // ASPENMESH
+  google.protobuf.BoolValue carrierGradeCipherSuites = 307;
+
+  google.protobuf.StringValue istiodCipherSuiteList = 308;
+  // ASPENMESH
 }
 
 // Configuration for Security Token Service (STS) server.
