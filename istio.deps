@@ -4,7 +4,11 @@
     "name": "PROXY_REPO_SHA",
     "repoName": "proxy",
     "file": "",
+<<<<<<< HEAD
     "lastStableSHA": "30be7e420b742a85421efe099bdba85860268a07"
+=======
+    "lastStableSHA": "a4fa84026e73601f4b56beb16075b1b545363bf5"
+>>>>>>> upupstream/release-1.18
   },
   {
     "_comment": "",
