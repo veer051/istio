@@ -722,6 +722,10 @@ var (
 	VerifySDSCertificate = env.Register("VERIFY_SDS_CERTIFICATE", true,
 		"If enabled, certificates fetched from SDS server will be verified before sending back to proxy.").Get()
 
+	CarrierGradeServiceEntryIstioMutual = env.RegisterBoolVar("CARRIER_GRADE_SERVICE_ENTRY_ISTIO_MUTUAL", false,
+		"If enabled, when a ServiceEntry host that has location MESH_EXTERNAL and also has a DestinationRule with ISTIO_MUTUAL use auto_sni"+
+			"instead of istio's proprietary ISTIO_MUTUAL sni hostname").Get()
+
 	EnableHCMInternalNetworks = env.Register("ENABLE_HCM_INTERNAL_NETWORKS", false,
 		"If enable, endpoints defined in mesh networks will be configured as internal addresses in Http Connection Manager").Get()
 

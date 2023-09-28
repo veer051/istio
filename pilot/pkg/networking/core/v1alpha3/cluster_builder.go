@@ -1089,6 +1089,12 @@ func (cb *ClusterBuilder) buildUpstreamClusterTLSContext(opts *buildClusterOpts,
 				tlsContext.CommonTlsContext.AlpnProtocols = util.ALPNInMesh
 			}
 		}
+
+		if isCarrierGradeExternalIstioMutualServiceEntriesForceAutoSNI(opts, tls) {
+			cb.changeAutoSniAndAutoSanValidation(c, true, false)
+			tlsContext.Sni = ""
+		}
+
 	case networking.ClientTLSSettings_SIMPLE:
 		tlsContext = &auth.UpstreamTlsContext{
 			CommonTlsContext: defaultUpstreamCommonTLSContext(),
