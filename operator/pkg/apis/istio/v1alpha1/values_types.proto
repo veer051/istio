@@ -466,7 +466,6 @@ message GlobalConfig {
   string platform = 69;
   // The next available key is 70
   // ASPENMESH
-  google.protobuf.BoolValue enableAutoSni = 303;
   google.protobuf.BoolValue carrierGradeCipherSuites = 307;
 
   google.protobuf.StringValue istiodCipherSuiteList = 308;

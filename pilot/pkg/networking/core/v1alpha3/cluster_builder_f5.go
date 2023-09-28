@@ -29,7 +29,7 @@ func isCarrierGradeExternalIstioMutualServiceEntriesForceAutoSNI(opts *buildClus
 		(opts.port.Protocol.IsHTTP() || opts.port.Protocol.IsHTTP2())
 }
 
-func (*ClusterBuilder) changeAutoSniAndAutoSanValidation(mc *MutableCluster, setAutoSni bool, setAutoSanValidation bool) {
+func (*ClusterBuilder) changeAutoSniAndAutoSanValidation(mc *MutableCluster, setAutoSni, setAutoSanValidation bool) {
 	if mc.httpProtocolOptions == nil {
 		mc.httpProtocolOptions = &http.HttpProtocolOptions{}
 	}
