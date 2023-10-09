@@ -29,6 +29,7 @@ import (
 )
 
 func TestModel_MigrateTrustDomain(t *testing.T) {
+	var annotations map[string]string
 	cases := []struct {
 		name     string
 		tdBundle trustdomain.Bundle
@@ -81,7 +82,7 @@ when:
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := New(tc.rule)
+			got, err := New(tc.rule, annotations)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -102,6 +103,7 @@ when:
 }
 
 func TestModel_Generate(t *testing.T) {
+	var annotations map[string]string
 	rule := yamlRule(t, `
 from:
 - source:
@@ -259,7 +261,7 @@ when:
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			m, err := New(tc.rule)
+			m, err := New(tc.rule, annotations)
 			if err != nil {
 				t.Fatal(err)
 			}

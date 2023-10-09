@@ -1,0 +1,38 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .To.ServiceName }}-xfcc-request-headers
+  annotations: {
+    "authz.contains.aspenmesh.io/xfcc": "true"
+  }
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .To.ServiceName }}"
+  rules:
+  - to:
+    - operation:
+        paths: ["/request-xfcc-headers"]
+    when:
+    - key: request.headers[x-forwarded-client-cert]
+      values: ["*{{ .Allowed.ServiceAccountName }}*"]
+---
+
+# Each of the following authorization policy uses a different condition on the given path.
+
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .To.ServiceName }}-xfcc-request-headers-no-annotation
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .To.ServiceName }}"
+  rules:
+  - to:
+    - operation:
+        paths: ["/request-xfcc-headers-baz"]
+    when:
+    - key: request.headers[x-forwarded-client-cert]
+      values: ["*{{ .Allowed.ServiceAccountName }}*"]
+---

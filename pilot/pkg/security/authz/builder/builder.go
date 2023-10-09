@@ -217,7 +217,7 @@ func (b Builder) build(policies []model.AuthorizationPolicy, action rbacpb.RBAC_
 				b.logger.AppendError(fmt.Errorf("skipped nil rule %s", name))
 				continue
 			}
-			m, err := authzmodel.New(rule)
+			m, err := authzmodel.New(rule, policy.Annotations)
 			if err != nil {
 				b.logger.AppendError(multierror.Prefix(err, fmt.Sprintf("skipped invalid rule %s:", name)))
 				continue

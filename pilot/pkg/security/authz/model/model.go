@@ -71,7 +71,7 @@ type Model struct {
 }
 
 // New returns a model representing a single authorization policy.
-func New(r *authzpb.Rule) (*Model, error) {
+func New(r *authzpb.Rule, annotations map[string]string) (*Model, error) {
 	m := Model{}
 
 	basePermission := ruleList{}
@@ -103,6 +103,8 @@ func New(r *authzpb.Rule) (*Model, error) {
 			basePrincipal.appendLast(requestAudiencesGenerator{}, k, when.Values, when.NotValues)
 		case k == attrRequestPresenter:
 			basePrincipal.appendLast(requestPresenterGenerator{}, k, when.Values, when.NotValues)
+		case useXfccHeader(annotations) && strings.HasPrefix(k, attrRequestHeader) && strings.Contains(strings.ToLower(k), f5attrXfccRequestHeader):
+			basePrincipal.appendLast(requestF5XFCCGenerator{}, k, when.Values, when.NotValues)
 		case strings.HasPrefix(k, attrRequestHeader):
 			basePrincipal.appendLast(requestHeaderGenerator{}, k, when.Values, when.NotValues)
 		case strings.HasPrefix(k, attrRequestClaims):

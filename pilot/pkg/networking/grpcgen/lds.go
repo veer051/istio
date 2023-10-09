@@ -260,7 +260,7 @@ func buildRBAC(node *model.Proxy, push *model.PushContext, suffix string, contex
 	for _, policy := range policies {
 		for i, rule := range policy.Spec.Rules {
 			name := fmt.Sprintf("%s-%s-%d", policy.Namespace, policy.Name, i)
-			m, err := authzmodel.New(rule)
+			m, err := authzmodel.New(rule, policy.Annotations)
 			if err != nil {
 				log.Warn("Invalid rule ", rule, err)
 				continue
