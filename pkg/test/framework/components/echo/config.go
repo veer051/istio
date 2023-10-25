@@ -172,6 +172,8 @@ type Config struct {
 	// IPFamilyPolicy. This is optional field. Mainly is used for dual stack testing.
 	IPFamilyPolicy string
 
+	DualStack bool
+
 	// WaypointProxy specifies if this workload should have an associated Waypoint
 	WaypointProxy bool
 }
@@ -349,8 +351,24 @@ func (c Config) IsDelta() bool {
 // - Headless
 // - TProxy
 // - Multi-Subset
+// - DualStack Service Pods
 func (c Config) IsRegularPod() bool {
-	return len(c.Subsets) == 1 && !c.IsVM() && !c.IsTProxy() && !c.IsNaked() && !c.IsHeadless() && !c.IsStatefulSet() && !c.IsProxylessGRPC()
+	return len(c.Subsets) == 1 &&
+		!c.IsVM() &&
+		!c.IsTProxy() &&
+		!c.IsNaked() &&
+		!c.IsHeadless() &&
+		!c.IsStatefulSet() &&
+		!c.IsProxylessGRPC() &&
+		!c.HasWaypointProxy() &&
+		!c.ZTunnelCaptured() &&
+		!c.DualStack
+}
+
+// ZTunnelCaptured returns true in ambient enabled namespaces where there is no sidecar
+func (c Config) ZTunnelCaptured() bool {
+	return c.Namespace.IsAmbient() && len(c.Subsets) > 0 &&
+		c.Subsets[0].Annotations.GetByName("ambient.istio.io/redirection") == "enabled"
 }
 
 // DeepCopy creates a clone of IstioEndpoint.
