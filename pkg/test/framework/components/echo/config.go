@@ -361,14 +361,7 @@ func (c Config) IsRegularPod() bool {
 		!c.IsStatefulSet() &&
 		!c.IsProxylessGRPC() &&
 		!c.HasWaypointProxy() &&
-		!c.ZTunnelCaptured() &&
 		!c.DualStack
-}
-
-// ZTunnelCaptured returns true in ambient enabled namespaces where there is no sidecar
-func (c Config) ZTunnelCaptured() bool {
-	return c.Namespace.IsAmbient() && len(c.Subsets) > 0 &&
-		c.Subsets[0].Annotations.GetByName("ambient.istio.io/redirection") == "enabled"
 }
 
 // DeepCopy creates a clone of IstioEndpoint.

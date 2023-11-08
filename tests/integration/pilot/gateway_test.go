@@ -405,7 +405,7 @@ func TestGatewayReadinessProbes(t *testing.T) {
 		Features("traffic.gateway.readiness").
 		Run(func(t framework.TestContext) {
 			c := t.Clusters().Default()
-			podIPs, err := i.PodIPsFor(c, "app=istio-ingressgateway")
+			podIPs, err := i.PodIPsFor(c, i.Settings().SystemNamespace, "app=istio-ingressgateway")
 			if err != nil {
 				t.Fatalf("error getting ingress gateway pod ips: %v", err)
 			}
