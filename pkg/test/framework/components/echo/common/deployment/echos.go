@@ -255,6 +255,7 @@ func (c *Config) DefaultEchoConfigs(t resource.Context) []echo.Config {
 			IncludeExtAuthz: c.IncludeExtAuthz,
 			IPFamilies:      "IPv6, IPv4",
 			IPFamilyPolicy:  "RequireDualStack",
+			DualStack:       true,
 		}
 		eSvc := echo.Config{
 			Service:         ESvc,
@@ -264,6 +265,7 @@ func (c *Config) DefaultEchoConfigs(t resource.Context) []echo.Config {
 			IncludeExtAuthz: c.IncludeExtAuthz,
 			IPFamilies:      "IPv6",
 			IPFamilyPolicy:  "SingleStack",
+			DualStack:       true,
 		}
 		defaultConfigs = append(defaultConfigs, dSvc, eSvc)
 	}
@@ -392,7 +394,7 @@ func New(ctx resource.Context, cfg Config) (*Echos, error) {
 	}
 
 	if !cfg.NoExternalNamespace {
-		builder = apps.External.build(builder)
+		builder = apps.External.build(ctx, builder)
 	}
 
 	echos, err := builder.Build()
