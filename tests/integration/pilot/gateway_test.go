@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -158,27 +157,98 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
-  name: http
+  name: http-1
 spec:
   parentRefs:
   - name: gateway
+  hostnames: ["bar.example.com"]
   rules:
   - backendRefs:
     - name: b
       port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: http-2
+spec:
+  parentRefs:
+  - name: gateway
+  hostnames: ["foo.example.com"]
+  rules:
+  - backendRefs:
+    - name: d
+      port: 80
 `).ApplyOrFail(t)
-	apps.B[0].CallOrFail(t, echo.CallOptions{
-		Port:   echo.Port{ServicePort: 80},
-		Scheme: scheme.HTTP,
-		HTTP: echo.HTTP{
-			Headers: headers.New().WithHost("bar.example.com").Build(),
+	testCases := []struct {
+		check echo.Checker
+		from  echo.Instances
+		host  string
+	}{
+		{
+			check: check.OK(),
+			from:  apps.B,
+			host:  "bar.example.com",
 		},
-		Address: fmt.Sprintf("gateway-istio.%s.svc.cluster.local", apps.Namespace.Name()),
-		Check:   check.OK(),
-		Retry: echo.Retry{
-			Options: []retry.Option{retry.Timeout(time.Minute)},
+		{
+			check: check.NotOK(),
+			from:  apps.B,
+			host:  "bar",
 		},
-	})
+	}
+	if t.Settings().EnableDualStack {
+		additionalTestCases := []struct {
+			check echo.Checker
+			from  echo.Instances
+			host  string
+		}{
+			// apps.D hosts a dual-stack service,
+			// apps.E hosts an ipv6 only service and
+			// apps.B hosts an ipv4 only service
+			{
+				check: check.OK(),
+				from:  apps.D,
+				host:  "bar.example.com",
+			},
+			{
+				check: check.OK(),
+				from:  apps.E,
+				host:  "bar.example.com",
+			},
+			{
+				check: check.OK(),
+				from:  apps.E,
+				host:  "foo.example.com",
+			},
+			{
+				check: check.OK(),
+				from:  apps.D,
+				host:  "foo.example.com",
+			},
+			{
+				check: check.OK(),
+				from:  apps.B,
+				host:  "foo.example.com",
+			},
+		}
+		testCases = append(testCases, additionalTestCases...)
+	}
+	for _, tc := range testCases {
+		t.NewSubTest(fmt.Sprintf("gateway-connectivity-from-%s", tc.from[0].NamespacedName())).Run(func(t framework.TestContext) {
+			tc.from[0].CallOrFail(t, echo.CallOptions{
+				Port: echo.Port{
+					Protocol:    protocol.HTTP,
+					ServicePort: 80,
+				},
+				Scheme: scheme.HTTP,
+				HTTP: echo.HTTP{
+					Headers: headers.New().WithHost(tc.host).Build(),
+				},
+				Address: fmt.Sprintf("gateway-istio.%s.svc.cluster.local", apps.Namespace.Name()),
+				Check:   tc.check,
+			})
+		})
+	}
 }
 
 func UnmanagedGatewayTest(t framework.TestContext) {
@@ -395,7 +465,7 @@ func StatusGatewayTest(t framework.TestContext) {
 }
 
 // Verify that the envoy readiness probes are reachable at
-// https://GatewayPodIP:15021/healthz/ready . This is being explicitly done
+// https://GatewaySvcIP:15021/healthz/ready . This is being explicitly done
 // to make sure, in dual-stack scenarios both v4 and v6 probes are reachable.
 func TestGatewayReadinessProbes(t *testing.T) {
 	// nolint: staticcheck
@@ -405,14 +475,15 @@ func TestGatewayReadinessProbes(t *testing.T) {
 		Features("traffic.gateway.readiness").
 		Run(func(t framework.TestContext) {
 			c := t.Clusters().Default()
-			podIPs, err := i.PodIPsFor(c, i.Settings().SystemNamespace, "app=istio-ingressgateway")
+			var svc *corev1.Service
+			svc, _, err := testKube.WaitUntilServiceEndpointsAreReady(c.Kube(), "istio-system", "istio-ingressgateway")
 			if err != nil {
-				t.Fatalf("error getting ingress gateway pod ips: %v", err)
+				t.Fatalf("error getting ingress gateway svc ips: %v", err)
 			}
-			for _, ip := range podIPs {
-				t.NewSubTest("gateway-readiness-probe-" + ip.IP).Run(func(t framework.TestContext) {
+			for _, ip := range svc.Spec.ClusterIPs {
+				t.NewSubTest("gateway-readiness-probe-" + ip).Run(func(t framework.TestContext) {
 					apps.External.All[0].CallOrFail(t, echo.CallOptions{
-						Address: ip.IP,
+						Address: ip,
 						Port:    echo.Port{ServicePort: 15021},
 						Scheme:  scheme.HTTP,
 						HTTP: echo.HTTP{
