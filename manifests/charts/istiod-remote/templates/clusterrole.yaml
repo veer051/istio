@@ -44,7 +44,7 @@ rules:
 
   # discovery and routing
   - apiGroups: [""]
-    resources: ["pods", "nodes", "services", "namespaces", "endpoints"]
+    resources: ["pods", "nodes", "services", "namespaces", "endpoints", "serviceaccounts"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["discovery.k8s.io"]
     resources: ["endpointslices"]

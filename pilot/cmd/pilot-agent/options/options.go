@@ -156,4 +156,8 @@ var (
 
 	useExternalWorkloadSDSEnv = env.Register("USE_EXTERNAL_WORKLOAD_SDS", false,
 		"When set to true, the istio-agent will require an external SDS and will throw an error if the workload SDS socket is not found").Get()
+	CertificateCustomFieldsAnnotationEnv = env.RegisterStringVar("CERTIFICATE_CUSTOM_FIELDS_ANNOTATION", "",
+		"Store the injected pod annotation certificate.aspenmesh.io/customFields to use when creating the x509 CSR").Get()
+	CertificateCustomFieldsEnv = env.RegisterBoolVar("CERTIFICATE_CUSTOM_FIELDS", false,
+		"If true, use the pod annotation certificate.aspenmesh.io/customFields when creating the x509 CSR").Get()
 )

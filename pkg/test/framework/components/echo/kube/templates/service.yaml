@@ -2,6 +2,12 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+{{- if .ServiceAccountAnnotations }}
+  annotations:
+{{- range $name, $value := .ServiceAccountAnnotations }}
+  {{ $name.Name | indent 4 }}: {{ printf "%q" $value.Value }}
+{{- end }}
+{{- end }}
   name: {{ .Service }}
 ---
 {{- end }}

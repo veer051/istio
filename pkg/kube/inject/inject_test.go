@@ -36,6 +36,7 @@ import (
 	opconfig "istio.io/istio/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/istio/pilot/pkg/features"
 	"istio.io/istio/pilot/pkg/model"
+	"istio.io/istio/pilot/pkg/serviceregistry"
 	"istio.io/istio/pilot/test/util"
 	"istio.io/istio/pkg/config/constants"
 	"istio.io/istio/pkg/config/mesh"
@@ -469,6 +470,7 @@ func TestInjection(t *testing.T) {
 					},
 					valuesConfig: valuesConfig,
 					revision:     "default",
+					kubeRegistry: serviceregistry.Simple{},
 				}
 				// Split multi-part yaml documents. Input and output will have the same number of parts.
 				inputYAMLs := splitYamlFile(inputFilePath, t)
@@ -498,6 +500,7 @@ func testInjectionTemplate(t *testing.T, template, input, expected string) {
 		t.Fatal(err)
 	}
 	webhook := &Webhook{
+		kubeRegistry: serviceregistry.Simple{},
 		Config: &Config{
 			Templates:        tmpl,
 			Policy:           InjectionPolicyEnabled,
@@ -531,6 +534,7 @@ spec:
 		t.Fatal(err)
 	}
 	webhook := &Webhook{
+		kubeRegistry: serviceregistry.Simple{},
 		Config: &Config{
 			Templates: p,
 			Aliases:   map[string][]string{"both": {"sidecar", "init"}},

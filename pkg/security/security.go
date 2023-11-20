@@ -259,6 +259,16 @@ type Options struct {
 	KeyFilePath string
 	// The path for an existing root certificate bundle
 	RootCertFilePath string
+	// CertificateCustomFieldsAnnotation determines if Aspen Mesh customFields annotation
+	// is used in x509 CSRs
+	CertificateCustomFields bool
+
+	// CertificateCustomFieldsAnnotation is the value from the customField annotation injected
+	// into the pod from the Service Account and downward API
+	CertificateCustomFieldsAnnotation string
+
+	// The namespace the Pod resides in
+	PodNamespace string
 }
 
 // TokenManager contains methods for generating token.

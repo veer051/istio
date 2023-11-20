@@ -24,6 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"istio.io/istio/pilot/pkg/features"
+	"istio.io/istio/pilot/pkg/serviceregistry/provider"
 	"istio.io/istio/pkg/kube/inject"
 	"istio.io/istio/pkg/webhooks"
 	"istio.io/pkg/env"
@@ -106,6 +107,7 @@ func (s *Server) initSidecarInjector(args *PilotArgs) (*inject.Webhook, error) {
 	}
 
 	s.addStartFunc(func(stop <-chan struct{}) error {
+		wh.InjectServiceRegistry(s.ServiceController().GetRegistry(s.clusterID, provider.Kubernetes))
 		wh.Run(stop)
 		return nil
 	})

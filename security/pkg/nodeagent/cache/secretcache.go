@@ -567,9 +567,28 @@ func (sc *SecretManagerClient) generateNewSecret(resourceName string) (*security
 		ServiceAccount: sc.configOptions.ServiceAccount,
 	}
 
-	cacheLog.Debugf("constructed host name for CSR: %s", csrHostName.String())
+	hostnames := csrHostName.String()
+	if sc.configOptions.CertificateCustomFields {
+		cF, err := pkiutil.NewCustomFields(sc.configOptions.ServiceAccount,
+			sc.configOptions.PodNamespace, sc.configOptions.CertificateCustomFieldsAnnotation)
+		if err != nil {
+			cacheLog.Warnf("could not use customFields annotation: %v", err)
+		} else {
+			uris, err := cF.GetSANURINames()
+			if err != nil {
+				cF = nil
+				cacheLog.Warnf("Parsing SAN URI error: %v", err)
+			} else {
+				hosts := []string{hostnames}
+				hosts = append(hosts, cF.GetSANDNSNames()...)
+				hosts = append(hosts, uris...)
+				hostnames = strings.Join(hosts, ",")
+			}
+		}
+	}
+
 	options := pkiutil.CertOptions{
-		Host:       csrHostName.String(),
+		Host:       hostnames,
 		RSAKeySize: sc.configOptions.WorkloadRSAKeySize,
 		PKCS8Key:   sc.configOptions.Pkcs8Keys,
 		ECSigAlg:   pkiutil.SupportedECSignatureAlgorithms(sc.configOptions.ECCSigAlg),

@@ -87,7 +87,7 @@ func TestAuthenticate_clientCertAuthenticator(t *testing.T) {
 					},
 				},
 			},
-			caller: &security.Caller{Identities: []string{callerID}},
+			caller: &security.Caller{Identities: []string{"uri://" + callerID}},
 		},
 	}
 

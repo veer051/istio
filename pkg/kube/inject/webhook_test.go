@@ -50,6 +50,7 @@ import (
 	"istio.io/istio/operator/pkg/util/clog"
 	"istio.io/istio/pilot/cmd/pilot-agent/status"
 	"istio.io/istio/pilot/pkg/model"
+	"istio.io/istio/pilot/pkg/serviceregistry"
 	"istio.io/istio/pilot/test/util"
 	"istio.io/istio/pkg/config"
 	"istio.io/istio/pkg/config/mesh"
@@ -920,6 +921,8 @@ func createWebhook(t testing.TB, cfg *Config, pcResources int) *Webhook {
 	if err != nil {
 		t.Fatalf("NewWebhook() failed: %v", err)
 	}
+
+	wh.kubeRegistry = serviceregistry.Simple{}
 	return wh
 }
 

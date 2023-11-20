@@ -34,6 +34,7 @@ func TestBuildSubjectAltNameExtension(t *testing.T) {
 	uriIdentity := Identity{Type: TypeURI, Value: []byte("spiffe://test.domain.com/ns/default/sa/default")}
 	ipIdentity := Identity{Type: TypeIP, Value: netip.MustParseAddr("10.0.0.1").AsSlice()}
 	dnsIdentity := Identity{Type: TypeDNS, Value: []byte("test.domain.com")}
+	uuidIdentity := Identity{Type: TypeURI, Value: []byte("1eb1f8fa-5607-4783-9a73-3e7630140833")}
 
 	testCases := map[string]struct {
 		hosts       string
@@ -55,6 +56,10 @@ func TestBuildSubjectAltNameExtension(t *testing.T) {
 			hosts:       "spiffe://test.domain.com/ns/default/sa/default,10.0.0.1,test.domain.com",
 			expectedExt: getSANExtension([]Identity{uriIdentity, ipIdentity, dnsIdentity}, t),
 		},
+		"UUID host": {
+			hosts:       "uri://1eb1f8fa-5607-4783-9a73-3e7630140833",
+			expectedExt: getSANExtension([]Identity{uuidIdentity}, t),
+		},
 	}
 
 	for id, tc := range testCases {
@@ -71,6 +76,7 @@ func TestBuildAndExtractIdentities(t *testing.T) {
 		{Type: TypeDNS, Value: []byte("test.domain.com")},
 		{Type: TypeIP, Value: []byte("10.0.0.1")},
 		{Type: TypeURI, Value: []byte("spiffe://test.domain.com/ns/default/sa/default")},
+		{Type: TypeURI, Value: []byte("uri://1eb1f8fa-5607-4783-9a73-3e7630140833")},
 	}
 	san, err := BuildSANExtension(ids)
 	if err != nil {
@@ -207,13 +213,13 @@ func TestExtractIDs(t *testing.T) {
 			expectedIDs:    nil,
 			expectedErrMsg: "failed to extract identities from SAN extension (error the SAN extension is incorrectly encoded)",
 		},
-		"Extensions with SAN": {
+		"Extensions with SAN URI": {
 			exts: []pkix.Extension{
 				{Id: asn1.ObjectIdentifier{1, 2, 3, 4}},
 				*sanExt,
 				{Id: asn1.ObjectIdentifier{3, 2, 1}},
 			},
-			expectedIDs: []string{id},
+			expectedIDs: []string{"uri://" + id},
 		},
 	}
 

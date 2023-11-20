@@ -176,6 +176,9 @@ type Config struct {
 
 	// WaypointProxy specifies if this workload should have an associated Waypoint
 	WaypointProxy bool
+
+	// ServiceAccountAnnotations is annotations on service account object.
+	ServiceAccountAnnotations Annotations
 }
 
 // Getter for a custom echo deployment

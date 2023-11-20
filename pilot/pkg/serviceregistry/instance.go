@@ -31,6 +31,9 @@ type Instance interface {
 
 	// Cluster for which the service registry applies. Only needed for multicluster systems.
 	Cluster() cluster.ID
+
+	// GetServiceAccountAnnotations returns the service account annotations associated with a pod in a namespace.
+	GetServiceAccountAnnotations(name, namespace string) map[string]string
 }
 
 var _ Instance = &Simple{}

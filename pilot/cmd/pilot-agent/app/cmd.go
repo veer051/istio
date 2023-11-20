@@ -124,7 +124,7 @@ func newProxyCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
+			applyF5EnvVars(secOpts, options.PodNamespaceVar.Get())
 			// If security token service (STS) port is not zero, start STS server and
 			// listen on STS port for STS requests. For STS, see
 			// https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-16.

@@ -91,6 +91,10 @@ items:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
+          - name: CERTIFICATE_CUSTOM_FIELDS_ANNOTATION
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.annotations['certificate.aspenmesh.io/customFields']
           - name: ISTIO_CPU_LIMIT
             valueFrom:
               resourceFieldRef:

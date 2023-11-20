@@ -27,6 +27,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -191,12 +192,12 @@ func (b *KeyCertBundle) CertOptions() (*CertOptions, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract id %v", err)
 	}
-	if len(ids) != 1 {
+	if len(ids) < 1 {
 		return nil, fmt.Errorf("expect single id from the cert, found %v", ids)
 	}
 
 	opts := &CertOptions{
-		Host:      ids[0],
+		Host:      strings.Join(ids, ","),
 		Org:       b.cert.Issuer.Organization[0],
 		IsCA:      b.cert.IsCA,
 		TTL:       b.cert.NotAfter.Sub(b.cert.NotBefore),

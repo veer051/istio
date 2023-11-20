@@ -86,6 +86,9 @@ func BuildSubjectAltNameExtension(hosts string) (*pkix.Extension, error) {
 			ids = append(ids, Identity{Type: TypeIP, Value: ip})
 		} else if strings.HasPrefix(host, spiffe.URIPrefix) {
 			ids = append(ids, Identity{Type: TypeURI, Value: []byte(host)})
+		} else if strings.HasPrefix(host, "uri://") {
+			host = strings.TrimPrefix(host, "uri://")
+			ids = append(ids, Identity{Type: TypeURI, Value: []byte(host)})
 		} else {
 			ids = append(ids, Identity{Type: TypeDNS, Value: []byte(host)})
 		}
@@ -190,7 +193,11 @@ func ExtractIDs(exts []pkix.Extension) ([]string, error) {
 
 	ids := []string{}
 	for _, id := range idsWithType {
-		ids = append(ids, string(id.Value))
+		if id.Type == TypeURI && (!strings.HasPrefix(string(id.Value), "spiffe://")) {
+			ids = append(ids, "uri://"+string(id.Value))
+		} else {
+			ids = append(ids, string(id.Value))
+		}
 	}
 	return ids, nil
 }

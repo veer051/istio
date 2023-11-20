@@ -242,6 +242,7 @@ type Controller struct {
 	exports    serviceExportCache
 	imports    serviceImportCache
 	pods       *PodCache
+	sa         *ServiceAccountCache
 
 	crdHandlers                []func(name string)
 	handlers                   model.ControllerHandlers
@@ -273,6 +274,8 @@ type Controller struct {
 	meshWatcher         mesh.Watcher
 
 	podsClient kclient.Client[*v1.Pod]
+
+	serviceAccountClient kclient.Client[*v1.ServiceAccount]
 
 	ambientIndex     *AmbientIndex
 	configController model.ConfigStoreController
@@ -356,6 +359,10 @@ func NewController(kubeClient kubelib.Client, options Options) *Controller {
 	}
 	c.exports = newServiceExportCache(c)
 	c.imports = newServiceImportCache(c)
+
+	c.serviceAccountClient = kclient.NewFiltered[*v1.ServiceAccount](kubeClient, kclient.Filter{ObjectFilter: c.opts.DiscoveryNamespacesFilter.Filter})
+	c.sa = newServiceAccountCache(c.serviceAccountClient)
+	registerHandlers[*v1.ServiceAccount](c, c.serviceAccountClient, "ServiceAccounts", c.sa.onEvent, nil)
 
 	c.meshWatcher = options.MeshWatcher
 	if c.opts.MeshNetworksWatcher != nil {
@@ -640,6 +647,7 @@ func (c *Controller) informersSynced() bool {
 		!c.endpoints.HasSynced() ||
 		!c.pods.pods.HasSynced() ||
 		!c.nodes.HasSynced() ||
+		!c.sa.sas.HasSynced() ||
 		(c.crdWatcher != nil && !c.crdWatcher.HasSynced()) {
 		return false
 	}

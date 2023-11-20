@@ -46,6 +46,7 @@ import (
 	opconfig "istio.io/istio/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/istio/pilot/cmd/pilot-agent/status"
 	"istio.io/istio/pilot/pkg/model"
+	"istio.io/istio/pilot/pkg/serviceregistry"
 	"istio.io/istio/pkg/config/mesh"
 	"istio.io/istio/pkg/kube"
 	"istio.io/istio/pkg/kube/kclient"
@@ -81,6 +82,8 @@ const (
 	prometheusPathAnnotation   = "prometheus_io_path"
 
 	watchDebounceDelay = 100 * time.Millisecond
+
+	customFieldsAnnotation = "certificate.aspenmesh.io/customFields"
 )
 
 const (
@@ -111,6 +114,8 @@ type Webhook struct {
 
 	env      *model.Environment
 	revision string
+
+	kubeRegistry serviceregistry.Instance
 }
 
 func (wh *Webhook) GetConfig() WebhookConfig {
@@ -181,6 +186,9 @@ type WebhookParameters struct {
 	Revision string
 
 	KubeClient kube.Client
+
+	// The istio service registry
+	KubeRegistry serviceregistry.Instance
 }
 
 // NewWebhook creates a new instance of a mutating webhook for automatic sidecar injection.
@@ -190,10 +198,11 @@ func NewWebhook(p WebhookParameters) (*Webhook, error) {
 	}
 
 	wh := &Webhook{
-		watcher:    p.Watcher,
-		meshConfig: p.Env.Mesh(),
-		env:        p.Env,
-		revision:   p.Revision,
+		watcher:      p.Watcher,
+		meshConfig:   p.Env.Mesh(),
+		env:          p.Env,
+		revision:     p.Revision,
+		kubeRegistry: p.KubeRegistry,
 	}
 
 	if p.KubeClient != nil {
@@ -363,6 +372,8 @@ type InjectionParameters struct {
 	revision            string
 	proxyEnvs           map[string]string
 	injectedAnnotations map[string]string
+
+	serviceAcctAnnotations map[string]string
 }
 
 func checkPreconditions(params InjectionParameters) {
@@ -654,9 +665,8 @@ func applyMetadata(pod *corev1.Pod, injectedPodData corev1.Pod, req InjectionPar
 	// Add all additional injected annotations. These are overridden if needed
 	pod.Annotations[annotation.SidecarStatus.Name] = getInjectionStatus(injectedPodData.Spec, req.revision)
 
-	// Deprecated; should be set directly in the template instead
-	for k, v := range req.injectedAnnotations {
-		pod.Annotations[k] = v
+	if val, ok := req.serviceAcctAnnotations[customFieldsAnnotation]; ok {
+		pod.Annotations[customFieldsAnnotation] = val
 	}
 }
 
@@ -1004,13 +1014,16 @@ func (wh *Webhook) inject(ar *kube.AdmissionReview, path string) *kube.Admission
 	}
 
 	proxyConfig := wh.env.GetProxyConfigOrDefault(pod.Namespace, pod.Labels, pod.Annotations, wh.meshConfig)
-	deploy, typeMeta := kube.GetDeployMetaFromPod(&pod)
 
 	var podNamespace *corev1.Namespace
 	if wh.namespaces != nil {
 		podNamespace = wh.namespaces.Get(pod.Namespace, "")
 	}
 
+	svcAcctName := pod.Spec.ServiceAccountName
+	svcAcctNamespace := pod.Namespace
+	svcAcctAnnotations := wh.kubeRegistry.GetServiceAccountAnnotations(svcAcctName, svcAcctNamespace)
+	deploy, typeMeta := kube.GetDeployMetaFromPod(&pod)
 	params := InjectionParameters{
 		pod:                 &pod,
 		deployMeta:          deploy,
@@ -1025,6 +1038,8 @@ func (wh *Webhook) inject(ar *kube.AdmissionReview, path string) *kube.Admission
 		revision:            wh.revision,
 		injectedAnnotations: wh.Config.InjectedAnnotations,
 		proxyEnvs:           parseInjectEnvs(path),
+
+		serviceAcctAnnotations: svcAcctAnnotations,
 	}
 	wh.mu.RUnlock()
 

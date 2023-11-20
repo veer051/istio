@@ -110,6 +110,21 @@ func (s *Server) CreateCertificate(ctx context.Context, request *pb.IstioCertifi
 	serverCaLog.Infof("generating a certificate for %v, requested ttl: %s",
 		sans, time.Duration(request.ValidityDuration*int64(time.Second)))
 	_, _, certChainBytes, rootCertBytes := s.ca.GetCAKeyCertBundle().GetAll()
+
+	hosts, err := getCSRHosts([]byte(request.Csr))
+	if err != nil {
+		serverCaLog.Debugf("could not fetch CSR hosts: %v", err)
+	}
+
+	// caller.Identities is a list of identities validated; make sure the
+	// CSR contains the the identity before we update the list of SAN DNS extensions
+	if isIdentityInHosts(caller.Identities, hosts) {
+		sans = addCSRHostsToIds(sans, hosts)
+	} else {
+		serverCaLog.Warnf("CSR SAN Extensions with DNS names (%v) did not contain a known caller identity (%v)",
+			hosts, caller.Identities)
+	}
+
 	certOpts := ca.CertOpts{
 		SubjectIDs: sans,
 		TTL:        time.Duration(request.ValidityDuration) * time.Second,
