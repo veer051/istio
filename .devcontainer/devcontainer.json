@@ -1,6 +1,6 @@
 {
   "name": "istio build-tools",
-  "image": "gcr.io/f5-gcs-7056-ptg-aspenmesh-pub/tw-istio-testing/build-tools:release-1.18-dcbc4271d36792e21a75433a2662bf09e71f1a26",
+  "image": "gcr.io/f5-gcs-7056-ptg-aspenmesh-pub/tw-istio-testing/build-tools:release-1.18-45edec62ab8c72dd94e8198bb3dc840367e33edf",
   "privileged": true,
   "remoteEnv": {
     "USE_GKE_GCLOUD_AUTH_PLUGIN": "True",
