@@ -337,6 +337,10 @@ templates:
         - name: {{ $key }}
           value: "{{ $value }}"
         {{- end }}
+        {{- if .Values.global.carrierGradeCipherSuites }}
+        - name: CARRIER_GRADE_CIPHER_SUITE
+          value: "{{ .Values.global.carrierGradeCipherSuites }}"
+        {{- end }}
         {{with .Values.global.imagePullPolicy }}imagePullPolicy: "{{.}}"{{end}}
         {{ if ne (annotation .ObjectMeta `status.sidecar.istio.io/port` .Values.global.proxy.statusPort) `0` }}
         readinessProbe:
