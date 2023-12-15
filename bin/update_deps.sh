@@ -14,38 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
-UPDATE_BRANCH=${UPDATE_BRANCH:-"release-1.18"}
-
-SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOTDIR=$(dirname "${SCRIPTPATH}")
-cd "${ROOTDIR}"
-
-# Get the sha of top commit
-# $1 = repo
-function getSha() {
-  local dir result
-  dir=$(mktemp -d)
-  git clone --depth=1 "https://github.com/istio/${1}.git" -b "${UPDATE_BRANCH}" "${dir}"
-
-  result="$(cd "${dir}" && git rev-parse HEAD)"
-  rm -rf "${dir}"
-
-  echo "${result}"
-}
-
-make update-common
-
-export GO111MODULE=on
-go get -u "istio.io/api@${UPDATE_BRANCH}"
-go get -u "istio.io/client-go@${UPDATE_BRANCH}"
-go get -u "istio.io/pkg@${UPDATE_BRANCH}"
-go mod tidy
-
-sed -i "s/^BUILDER_SHA=.*\$/BUILDER_SHA=$(getSha release-builder)/" prow/release-commit.sh
-chmod +x prow/release-commit.sh
-sed -i '/PROXY_REPO_SHA/,/lastStableSHA/ { s/"lastStableSHA":.*/"lastStableSHA": "'"$(getSha proxy)"'"/  }; /ZTUNNEL_REPO_SHA/,/lastStableSHA/ { s/"lastStableSHA":.*/"lastStableSHA": "'"$(getSha ztunnel)"'"/  }' istio.deps
+set -exo pipefail
 
 # shellcheck disable=SC1001
 LATEST_DEB11_DISTROLESS_SHA256=$(crane digest gcr.io/distroless/static-debian11 | awk -F\: '{print $2}')
