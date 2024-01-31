@@ -144,6 +144,10 @@ if [[ -z "${SKIP_SETUP:-}" ]]; then
   export DEFAULT_CLUSTER_YAML="./prow/config/default.yaml"
   export METRICS_SERVER_CONFIG_DIR='./prow/config/metrics'
 
+  if [[ $NODE_IMAGE == *"1.28"* ]] || [[ $NODE_IMAGE == *"1.29"* ]]; then
+    export DEFAULT_CLUSTER_YAML="./prow/config/default-128-or-later.yaml"
+  fi
+
   if [[ "${TOPOLOGY}" == "SINGLE_CLUSTER" ]]; then
     trace "setup kind cluster" setup_kind_cluster_retry "istio-testing" "${NODE_IMAGE}" "${KIND_CONFIG}"
   else
